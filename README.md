@@ -160,5 +160,5 @@
         <div class="mb-8">
           <label class="block text-sm font-bold text-gray-700 mb-2">
             <i class="fa-solid fa-file-lines text-maroon-700 ml-1"></i> تفاصيل الرصد أو الطلب المرسل:
-          </label>
-          <div id="viewContent" class="w-full min-h-[140px] border border-gray-200 rounded-xl p-4 bg-white/
+          
+      
