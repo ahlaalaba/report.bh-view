@@ -1,523 +1,439 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شاشة رصد وملاحظات بلاغات العباءة</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Cairo Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-            .print-area {
-                box-shadow: none !important;
-                border: none !important;
-                padding: 0 !important;
-            }
-        }
-    </style>
-</head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>عرض ومتابعة تقارير مضيف أهل العباء - البلاد القديم</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Cairo -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Screen 1: Lock / Auth Screen (PIN Protected 36386184) -->
-    <div id="authScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/95 backdrop-blur-md">
-        <div class="glass-card max-w-md w-full p-8 rounded-3xl shadow-2xl border border-slate-700/40 text-center relative overflow-hidden">
-            <div class="absolute -top-12 -right-12 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl"></div>
-            <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-amber-500/20 rounded-full blur-2xl"></div>
-            
-            <div class="w-20 h-20 bg-indigo-500/10 text-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner text-3xl">
-                <i class="fa-solid fa-user-shield"></i>
-            </div>
-            
-            <h2 class="text-2xl font-bold text-slate-800 mb-2">لوحة رصد وملاحظات العباءة</h2>
-            <p class="text-slate-500 text-xs mb-6">يرجى إدخال الرقم السري المعتمد لاستعراض وكتابة الملاحظات</p>
-            
-            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <input type="password" id="passcode" maxlength="12" placeholder="••••••••" required autofocus
-                           class="w-full px-4 py-3 text-center text-2xl font-bold tracking-widest rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-slate-50">
-                </div>
-                <div id="authError" class="hidden text-rose-500 text-xs font-semibold animate-pulse">
-                    <i class="fa-solid fa-circle-exclamation ml-1"></i> الرقم السري غير صحيح!
-                </div>
-                <button type="submit" 
-                        class="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-lock-open"></i>
-                    <span>دخول للسيستم</span>
-                </button>
-            </form>
-            <div class="mt-6 pt-4 border-t border-slate-200/60 text-[11px] text-slate-400">
-                الرقم السري المعتمد للرصد: <span class="font-mono bg-slate-200 px-2 py-0.5 rounded text-slate-700 font-bold">36386184</span>
-            </div>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif'],
+          },
+          colors: {
+            maroon: {
+              50: '#fdf2f2',
+              100: '#fde8e8',
+              700: '#800000',
+              800: '#660000',
+              900: '#4a0000',
+            },
+            gold: {
+              400: '#fbbf24',
+              500: '#d97706',
+              600: '#b45309',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #f3f4f6;
+    }
+    
+    /* الشعار في خلفية الورقة بنسبة وضوح 50% */
+    .watermark-bg {
+      position: relative;
+    }
+    .watermark-bg::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 75%;
+      height: 75%;
+      background-image: url('image_be668db9-removebg-preview.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      opacity: 0.50;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .print-content {
+      position: relative;
+      z-index: 10;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background-color: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .print-container {
+        box-shadow: none !important;
+        border: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+      .watermark-bg::before {
+        opacity: 0.30 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-3 md:p-6 text-gray-800">
+
+  <!-- ================= 1. شاشة تسجيل الدخول بالرمز السري ================= -->
+  <div id="loginScreen" class="fixed inset-0 bg-gray-900/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 max-w-md w-full p-6 md:p-8 text-center relative overflow-hidden">
+      
+      <!-- شعار المضيف -->
+      <div class="mb-4">
+        <img src="image_be668db9-removebg-preview.png" alt="مضيف أهل العباء" class="h-20 mx-auto object-contain">
+      </div>
+
+      <h2 class="text-2xl font-black text-maroon-800 mb-1">مضيف أهل العباء</h2>
+      <p class="text-xs text-gold-600 font-bold mb-6">البلاد القديم — مملكة البحرين</p>
+
+      <!-- تنبيه الخطأ عند إدخال رمز خاطئ -->
+      <div id="loginError" class="hidden mb-4 bg-red-100 border-r-4 border-red-600 text-red-700 p-3 rounded-lg text-xs font-bold text-right flex items-center gap-2">
+        <i class="fa-solid fa-circle-exclamation text-base"></i>
+        <span>الرقم السري غير صحيح، الرجاء المحاولة مرة أخرى!</span>
+      </div>
+
+      <form onsubmit="handleLogin(event)" class="space-y-4 text-right">
+        
+        <!-- حقل الرقم السري (مخفي) -->
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">أدخل الرقم السري للوصول للتقارير:</label>
+          <input 
+            type="password" 
+            id="loginPin" 
+            placeholder="••••••••" 
+            required 
+            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-center text-xl font-bold tracking-widest focus:ring-2 focus:ring-maroon-700 outline-none"
+          />
         </div>
+
+        <button 
+          type="submit" 
+          class="w-full py-3 bg-maroon-700 hover:bg-maroon-800 text-white font-bold rounded-lg shadow-md transition flex items-center justify-center gap-2 text-sm"
+        >
+          <i class="fa-solid fa-lock-open"></i> تسجيل الدخول
+        </button>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= 2. واجهة عرض ومتابعة التقارير والملاحظات ================= -->
+  <div id="mainDashboard" class="hidden max-w-5xl mx-auto mb-20">
+
+    <!-- شريط معلومات أعلى الشاشة -->
+    <div class="no-print bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-200 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-maroon-700 text-gold-400 flex items-center justify-center font-bold text-lg">
+          <i class="fa-solid fa-clipboard-check"></i>
+        </div>
+        <div>
+          <div class="text-xs text-gray-500 font-bold">النظام:</div>
+          <div class="text-sm font-black text-maroon-800">عرض ومتابعة حالات التقارير</div>
+        </div>
+      </div>
+
+      <button onclick="logout()" class="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-bold text-xs transition">
+        <i class="fa-solid fa-right-from-bracket"></i> خروج
+      </button>
     </div>
 
-    <!-- Main Application Screen (Rasad & Notes System) -->
-    <div id="mainContent" class="hidden min-h-screen flex flex-col">
-        
-        <!-- Navbar Header -->
-        <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md no-print">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-                <div class="flex items-center space-x-3 space-x-reverse">
-                    <div class="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-xl shadow-md">
-                        <i class="fa-solid fa-clipboard-list"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-lg sm:text-xl font-bold leading-tight">سيستم رصد وملاحظات بلاغات العباءة</h1>
-                        <p class="text-xs text-indigo-300">نظام المتابعة الإدارية وإضافة التعليقات</p>
-                    </div>
-                </div>
+    <!-- ورقة التقرير الموثق (للعرض فقط) -->
+    <div class="print-container watermark-bg bg-white rounded-xl shadow-lg border border-gray-200 p-6 md:p-10 relative overflow-hidden">
+      
+      <div class="print-content">
 
-                <div class="flex items-center gap-2 sm:gap-3">
-                    <button onclick="window.print()" 
-                            class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 text-xs font-semibold transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-print"></i>
-                        <span class="hidden sm:inline">طباعة الرصد</span>
-                    </button>
-                    <button onclick="logout()" 
-                            class="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl border border-rose-500/30 text-xs font-semibold transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>قفل الشاشة</span>
-                    </button>
-                </div>
+        <!-- الترويسة الهيدر -->
+        <header class="border-b-2 border-maroon-700 pb-6 mb-6">
+          <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-right">
+            
+            <div class="flex items-center gap-4">
+              <img src="image_be668db9-removebg-preview.png" alt="مضيف أهل العباء" class="h-20 w-auto object-contain">
+              <div>
+                <h1 class="text-2xl md:text-3xl font-black text-maroon-800 tracking-wide">مضيف أهل العباء</h1>
+                <p class="text-xs md:text-sm text-gold-600 font-bold mt-1">
+                  <i class="fa-solid fa-location-dot ml-1"></i> البلاد القديم — مملكة البحرين
+                </p>
+                <p class="text-[11px] text-gray-400 font-semibold mt-0.5">شاشة متابعة وتحديث التقارير</p>
+              </div>
             </div>
+
+            <!-- اليوم والتاريخ والساعة الحية -->
+            <div class="bg-maroon-50/90 backdrop-blur-sm border border-maroon-100 rounded-lg p-3 text-center md:text-left min-w-[210px]">
+              <div id="liveDay" class="text-maroon-800 font-black text-sm">--</div>
+              <div id="liveDate" class="text-gray-600 text-xs font-semibold my-0.5">--/--/----</div>
+              <div id="liveTime" class="text-gold-600 font-black text-sm dir-ltr">--:--:-- --</div>
+            </div>
+
+          </div>
         </header>
 
-        <!-- Dynamic Summary Statistics Bar -->
-        <div class="bg-white border-b border-slate-200 py-4 shadow-sm no-print">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-bold text-slate-500">إجمالي البلاغات</p>
-                        <h3 id="statTotal" class="text-xl font-extrabold text-slate-800">0</h3>
-                    </div>
-                    <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-box-archive"></i>
-                    </div>
-                </div>
+        <!-- تفاصيل التقرير المعروض وحالته -->
+        <div class="bg-gray-50/90 border border-gray-200 rounded-xl p-4 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <span class="block text-xs font-bold text-gray-500 mb-1">اسم الكريم (مُعد التقرير):</span>
+            <div id="viewAuthor" class="text-sm font-black text-gray-800 bg-white p-2.5 rounded-lg border border-gray-200">عبدالله المحمود</div>
+          </div>
 
-                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-bold text-slate-500">بلاغات بانتظار المتابعة</p>
-                        <h3 id="statPending" class="text-xl font-extrabold text-amber-600">0</h3>
-                    </div>
-                    <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-hourglass-half"></i>
-                    </div>
-                </div>
+          <div>
+            <span class="block text-xs font-bold text-gray-500 mb-1">رقم الهاتف:</span>
+            <div id="viewPhone" class="text-sm font-black text-gray-800 bg-white p-2.5 rounded-lg border border-gray-200 dir-ltr text-right">🇧🇭 +973 39445566</div>
+          </div>
 
-                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-bold text-slate-500">ملاحظات مسجلة بالسيستم</p>
-                        <h3 id="statNotes" class="text-xl font-extrabold text-blue-600">0</h3>
-                    </div>
-                    <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-comments"></i>
-                    </div>
-                </div>
-
-                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-bold text-slate-500">بلاغات عاجلة جداً</p>
-                        <h3 id="statUrgent" class="text-xl font-extrabold text-rose-600">0</h3>
-                    </div>
-                    <div class="w-10 h-10 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                    </div>
-                </div>
-            </div>
+          <!-- تحديد إشعار وحالة التقرير (جديد / قيد متابعة / تم الحل) -->
+          <div>
+            <span class="block text-xs font-bold text-gray-500 mb-1">إشعار وحالة التقرير:</span>
+            <select 
+              id="reportStatus" 
+              onchange="updateStatusStyle()" 
+              class="w-full border-2 rounded-lg p-2 text-sm font-black outline-none transition cursor-pointer"
+            >
+              <option value="جديد" class="bg-blue-100 text-blue-800">🔵 جديد</option>
+              <option value="قيد المتابعة" class="bg-amber-100 text-amber-800">🟡 قيد المتابعة</option>
+              <option value="تم الحل" class="bg-green-100 text-green-800">🟢 تم الحل</option>
+            </select>
+          </div>
         </div>
 
-        <!-- Main Workspace Area -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 print-area">
-                
-                <!-- Filters & Search Toolbar -->
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-100 no-print">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-note-sticky text-indigo-600"></i>
-                            رصد البلاغات وكتابة الملاحظات
-                        </h2>
-                        <p class="text-xs text-slate-400">يمكنك إضافة ملاحظات خاصة لكل بلاغ وحفظها مباشرة على السيستم</p>
-                    </div>
+        <!-- نص التقرير (عرض فقط - غير قابل للتعديل) -->
+        <div class="mb-8">
+          <label class="block text-sm font-bold text-gray-700 mb-2">
+            <i class="fa-solid fa-file-lines text-maroon-700 ml-1"></i> تفاصيل ومضمون التقرير المعروض:
+          </label>
+          <div id="viewContent" class="w-full min-h-[160px] border border-gray-200 rounded-xl p-4 bg-white/90 text-gray-800 text-sm font-medium leading-relaxed shadow-inner">
+            تمت المتابعة وتجهيز كافة المستلزمات اليومية في مضيف أهل العباء بالبلاد القديم وتوفير المشروبات والمأكولات للزوار بنجاح وانسيابية كاملة.
+          </div>
+        </div>
 
-                    <div class="flex flex-wrap items-center gap-2.5">
-                        <!-- Search Box -->
-                        <div class="relative min-w-[220px]">
-                            <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs"></i>
-                            <input type="text" id="searchInput" oninput="renderMonitorFeed()" placeholder="بحث باسم المضيف، رقم العباءة، أو الملاحظة..."
-                                   class="w-full pr-8 pl-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        </div>
+        <!-- قسم الملاحظات والتعليقات -->
+        <div class="border-t-2 border-dashed border-gray-300 pt-6 mb-6">
+          <h3 class="text-base font-black text-maroon-800 mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-comments text-gold-500"></i> ملاحظات وتعليقات المتابعة:
+          </h3>
 
-                        <!-- Status Filter -->
-                        <select id="filterStatus" onchange="renderMonitorFeed()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="الكل">جميع الحالات</option>
-                            <option value="قيد المتابعة">قيد المتابعة</option>
-                            <option value="تم الحل">تم الحل</option>
-                            <option value="جديد">جديد</option>
-                        </select>
+          <!-- قائمة الملاحظات المضافة -->
+          <div id="notesContainer" class="space-y-3 mb-4">
+            <!-- تظهر الملاحظات هنا -->
+          </div>
 
-                        <!-- Priority Filter -->
-                        <select id="filterPriority" onchange="renderMonitorFeed()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="الكل">كل درجات الأهمية</option>
-                            <option value="عاجل جداً">عاجل جداً</option>
-                            <option value="هام">هام</option>
-                            <option value="عادي">عادي</option>
-                        </select>
-
-                        <button onclick="renderMonitorFeed()" title="تحديث القائمة" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-colors">
-                            <i class="fa-solid fa-arrows-rotate text-xs"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Print Header -->
-                <div class="hidden print:block mb-6 border-b-2 border-slate-800 pb-4">
-                    <h1 class="text-2xl font-bold">تقرير رصد بلاغات وملاحظات العباءة الشامل</h1>
-                    <p class="text-xs text-slate-600">تاريخ الاستخراج: <span id="printDate"></span></p>
-                </div>
-
-                <!-- Reports Feed Grid -->
-                <div id="monitorList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Cards are dynamically rendered via JS -->
-                </div>
-
-                <!-- Empty State -->
-                <div id="emptyState" class="hidden py-20 text-center">
-                    <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
-                        <i class="fa-solid fa-clipboard-question"></i>
-                    </div>
-                    <h3 class="text-slate-600 font-bold text-sm">لا توجد بلاغات مسجلة مطابق للشروط</h3>
-                    <p class="text-slate-400 text-xs mt-1">قم بتغيير خيارات التصفية أو إرسال بلاغ جديد من شاشة المضيف</p>
-                </div>
-
+          <!-- إضافة ملاحظة جديدة -->
+          <div class="no-print bg-maroon-50/60 p-4 rounded-xl border border-maroon-100">
+            <label class="block text-xs font-bold text-gray-700 mb-2">كتابة ملاحظة جديدة على التقرير:</label>
+            <div class="flex flex-col md:flex-row gap-2">
+              <textarea 
+                id="newNoteInput" 
+                rows="2" 
+                placeholder="اكتب ملاحظاتك أو توجيهاتك هنا..." 
+                class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-maroon-700 outline-none bg-white"
+              ></textarea>
+              <button 
+                onclick="addNote()" 
+                class="px-5 py-2.5 bg-maroon-700 hover:bg-maroon-800 text-white rounded-lg font-bold text-sm shadow transition shrink-0 flex items-center justify-center gap-1.5"
+              >
+                <i class="fa-solid fa-paper-plane text-gold-400"></i> إضافة الملاحظة
+              </button>
             </div>
-        </main>
+          </div>
+        </div>
 
-        <!-- Footer -->
-        <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 no-print">
-            <p>سيستم إدارة وملاحظات بلاغات العباءة &copy; 2026 - جميع الحقوق محفوظة</p>
+        <!-- ترويسة سفلية للطباعة -->
+        <footer class="mt-8 pt-4 border-t border-gray-200 text-center text-xs text-gray-500 hidden print:block font-bold">
+          مضيف أهل العباء — البلاد القديم (مملكة البحرين)
         </footer>
+
+      </div>
+
     </div>
 
-    <!-- JavaScript Logic -->
-    <script>
-        const VALID_PASSCODE = "36386184";
-        const STORAGE_KEY = "host_abaya_reports_data";
-        const AUTH_KEY = "abaya_monitor_notes_session";
+  </div>
 
-        window.onload = function() {
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('ar-SA') + ' - ' + now.toLocaleTimeString('ar-SA');
-            if (document.getElementById('printDate')) {
-                document.getElementById('printDate').textContent = dateStr;
-            }
+  <!-- الشريط السفلي الثابت للطباعة والحفظ -->
+  <div class="no-print fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 py-3 px-4 shadow-2xl z-40">
+    <div class="max-w-5xl mx-auto flex items-center justify-between gap-3">
+      
+      <div class="text-xs text-gray-600 font-bold hidden md:flex items-center gap-2">
+        <img src="image_be668db9-removebg-preview.png" alt="شعار" class="h-6 w-auto inline">
+        مضيف أهل العباء — البلاد القديم
+      </div>
 
-            checkAuth();
-            renderMonitorFeed();
-        };
+      <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+        <!-- زر حفظ الحالة والملاحظات -->
+        <button 
+          onclick="saveReportState()" 
+          class="flex-1 md:flex-none px-5 py-2.5 bg-maroon-700 hover:bg-maroon-800 text-white rounded-lg font-bold text-sm transition shadow flex items-center justify-center gap-2"
+        >
+          <i class="fa-solid fa-floppy-disk text-gold-400"></i> حفظ التغيرات والملاحظات
+        </button>
 
-        // Authentication Handler
-        function handleLogin(e) {
-            e.preventDefault();
-            const inputPass = document.getElementById('passcode').value.trim();
-            const errorEl = document.getElementById('authError');
+        <!-- زر الطباعة -->
+        <button 
+          onclick="window.print()" 
+          class="flex-1 md:flex-none px-5 py-2.5 bg-gold-500 hover:bg-gold-600 text-white rounded-lg font-bold text-sm transition shadow flex items-center justify-center gap-2"
+        >
+          <i class="fa-solid fa-print"></i> طباعة / PDF
+        </button>
+      </div>
 
-            if (inputPass === VALID_PASSCODE) {
-                sessionStorage.setItem(AUTH_KEY, "true");
-                errorEl.classList.add('hidden');
-                document.getElementById('passcode').value = "";
-                checkAuth();
-                renderMonitorFeed();
-            } else {
-                errorEl.classList.remove('hidden');
-                document.getElementById('passcode').focus();
-            }
-        }
+    </div>
+  </div>
 
-        function checkAuth() {
-            const isAuthenticated = sessionStorage.getItem(AUTH_KEY) === "true";
-            const authScreen = document.getElementById('authScreen');
-            const mainContent = document.getElementById('mainContent');
+  <script>
+    // الرقم السري المعتمد للدخول
+    const SECRET_PIN = "36386184";
+    let notesList = [];
 
-            if (isAuthenticated) {
-                authScreen.classList.add('hidden');
-                mainContent.classList.remove('hidden');
-            } else {
-                authScreen.classList.remove('hidden');
-                mainContent.classList.add('hidden');
-            }
-        }
+    // 1. تسجيل الدخول بالرقم السري
+    function handleLogin(e) {
+      e.preventDefault();
+      const pin = document.getElementById('loginPin').value.trim();
+      const errorBox = document.getElementById('loginError');
 
-        function logout() {
-            sessionStorage.removeItem(AUTH_KEY);
-            checkAuth();
-        }
+      if (pin === SECRET_PIN) {
+        errorBox.classList.add('hidden');
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('mainDashboard').classList.remove('hidden');
+        loadSavedData();
+      } else {
+        errorBox.classList.remove('hidden');
+      }
+    }
 
-        // Fetch reports with fallback initialization for notes/status arrays
-        function getStoredReports() {
-            const data = localStorage.getItem(STORAGE_KEY);
-            if (!data) return [];
-            
-            try {
-                const parsed = JSON.parse(data);
-                return parsed.map(item => ({
-                    ...item,
-                    notesList: item.notesList || [], // Ensure notes array exists
-                    status: item.status || "جديد"   // Default status
-                }));
-            } catch(e) {
-                return [];
-            }
-        }
+    function logout() {
+      document.getElementById('loginPin').value = '';
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('mainDashboard').classList.add('hidden');
+    }
 
-        function saveReports(reports) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
-        }
+    // 2. تغيير لون وتنسيق إشعار وحالة التقرير (جديد / قيد متابعة / تم الحل)
+    function updateStatusStyle() {
+      const statusSelect = document.getElementById('reportStatus');
+      const val = statusSelect.value;
+      statusSelect.className = "w-full border-2 rounded-lg p-2 text-sm font-black outline-none transition cursor-pointer ";
 
-        // Add a new note to a specific report
-        function addNoteToReport(reportId) {
-            const noteInput = document.getElementById(`noteInput-${reportId}`);
-            if (!noteInput) return;
+      if (val === "جديد") {
+        statusSelect.classList.add("border-blue-500", "bg-blue-50", "text-blue-800");
+      } else if (val === "قيد المتابعة") {
+        statusSelect.classList.add("border-amber-500", "bg-amber-50", "text-amber-800");
+      } else if (val === "تم الحل") {
+        statusSelect.classList.add("border-green-500", "bg-green-50", "text-green-800");
+      }
+    }
 
-            const noteText = noteInput.value.trim();
-            if (!noteText) return;
+    // 3. التوقيت والتاريخ التلقائي الحي
+    function updateLiveDateTime() {
+      const now = new Date();
+      const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+      
+      const dayName = days[now.getDay()];
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = now.getFullYear();
 
-            const reports = getStoredReports();
-            const reportIndex = reports.findIndex(r => r.id === reportId);
+      let hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'م' : 'ص';
+      hours = hours % 12 || 12;
 
-            if (reportIndex !== -1) {
-                const newNote = {
-                    id: Date.now(),
-                    text: noteText,
-                    date: new Date().toLocaleString('ar-SA', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })
-                };
+      document.getElementById('liveDay').textContent = dayName;
+      document.getElementById('liveDate').textContent = `${year}/${month}/${day}`;
+      document.getElementById('liveTime').textContent = `${hours}:${minutes}:${seconds} ${ampm}`;
+    }
 
-                if (!reports[reportIndex].notesList) {
-                    reports[reportIndex].notesList = [];
-                }
+    setInterval(updateLiveDateTime, 1000);
+    updateLiveDateTime();
 
-                reports[reportIndex].notesList.push(newNote);
-                saveReports(reports);
-                renderMonitorFeed();
-            }
-        }
+    // 4. إضافة ملاحظة جديدة
+    function addNote() {
+      const input = document.getElementById('newNoteInput');
+      const text = input.value.trim();
 
-        // Delete a note from a report
-        function deleteNote(reportId, noteId) {
-            const reports = getStoredReports();
-            const reportIndex = reports.findIndex(r => r.id === reportId);
+      if (!text) {
+        alert('الرجاء كتابة الملاحظة أولاً.');
+        return;
+      }
 
-            if (reportIndex !== -1 && reports[reportIndex].notesList) {
-                reports[reportIndex].notesList = reports[reportIndex].notesList.filter(n => n.id !== noteId);
-                saveReports(reports);
-                renderMonitorFeed();
-            }
-        }
+      const newNote = {
+        text: text,
+        time: document.getElementById('liveTime').textContent,
+        date: document.getElementById('liveDate').textContent
+      };
 
-        // Change status of a report (جديد / قيد المتابعة / تم الحل)
-        function updateReportStatus(reportId, newStatus) {
-            const reports = getStoredReports();
-            const reportIndex = reports.findIndex(r => r.id === reportId);
+      notesList.push(newNote);
+      input.value = '';
+      renderNotes();
+      saveReportState();
+    }
 
-            if (reportIndex !== -1) {
-                reports[reportIndex].status = newStatus;
-                saveReports(reports);
-                renderMonitorFeed();
-            }
-        }
+    // 5. عرض قائمة الملاحظات
+    function renderNotes() {
+      const container = document.getElementById('notesContainer');
+      container.innerHTML = '';
 
-        // Delete entire report
-        function deleteReport(id) {
-            if (confirm("هل أنت تأكد من رغبتك في مسح هذا البلاغ بشكل نهائي من السيستم؟")) {
-                let reports = getStoredReports();
-                reports = reports.filter(r => r.id !== id);
-                saveReports(reports);
-                renderMonitorFeed();
-            }
-        }
+      if (notesList.length === 0) {
+        container.innerHTML = '<div class="text-xs text-gray-400 italic">لا توجد ملاحظات مضافة حتى الآن.</div>';
+        return;
+      }
 
-        // Render Cards & Dashboard View
-        function renderMonitorFeed() {
-            const reports = getStoredReports();
-            const searchValue = document.getElementById('searchInput').value.trim().toLowerCase();
-            const statusFilter = document.getElementById('filterStatus').value;
-            const priorityFilter = document.getElementById('filterPriority').value;
+      notesList.forEach((note) => {
+        const item = document.createElement('div');
+        item.className = 'bg-white p-3 rounded-lg border border-gray-200 shadow-sm text-xs';
+        item.innerHTML = `
+          <div class="flex justify-between items-center mb-1 text-gray-500 font-bold border-b pb-1">
+            <span class="text-maroon-700 font-black"><i class="fa-solid fa-comment-dots text-gold-500 ml-1"></i> ملاحظة متابعة</span>
+            <span class="text-[10px] dir-ltr">${note.date} | ${note.time}</span>
+          </div>
+          <p class="text-gray-800 leading-relaxed font-medium mt-1">${note.text}</p>
+        `;
+        container.appendChild(item);
+      });
+    }
 
-            const monitorList = document.getElementById('monitorList');
-            const emptyState = document.getElementById('emptyState');
+    // 6. حفظ حالة التقرير والملاحظات
+    function saveReportState() {
+      const data = {
+        status: document.getElementById('reportStatus').value,
+        notes: notesList
+      };
 
-            // Calculate Statistics
-            let totalNotesCount = 0;
-            let pendingCount = 0;
-            let urgentCount = 0;
+      localStorage.setItem('alabaa_report_view2_db', JSON.stringify(data));
+      alert('تم حفظ حالة التقرير والملاحظات بنجاح!');
+    }
 
-            reports.forEach(r => {
-                if (r.notesList) totalNotesCount += r.notesList.length;
-                if (r.status !== "تم الحل") pendingCount++;
-                if (r.priority === "عاجل جداً") urgentCount++;
-            });
-
-            document.getElementById('statTotal').textContent = reports.length;
-            document.getElementById('statPending').textContent = pendingCount;
-            document.getElementById('statNotes').textContent = totalNotesCount;
-            document.getElementById('statUrgent').textContent = urgentCount;
-
-            // Apply Search & Filters
-            let filtered = reports.filter(item => {
-                const matchesSearch = 
-                    (item.hostName && item.hostName.toLowerCase().includes(searchValue)) ||
-                    (item.abayaTag && item.abayaTag.toLowerCase().includes(searchValue)) ||
-                    (item.details && item.details.toLowerCase().includes(searchValue)) ||
-                    (item.category && item.category.toLowerCase().includes(searchValue)) ||
-                    (item.notesList && item.notesList.some(n => n.text.toLowerCase().includes(searchValue)));
-
-                const matchesStatus = (statusFilter === "الكل") || (item.status === statusFilter);
-                const matchesPriority = (priorityFilter === "الكل") || (item.priority === priorityFilter);
-
-                return matchesSearch && matchesStatus && matchesPriority;
-            });
-
-            if (filtered.length === 0) {
-                monitorList.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                return;
-            }
-
-            emptyState.classList.add('hidden');
-
-            monitorList.innerHTML = filtered.map(item => {
-                let priorityBadge = "bg-slate-100 text-slate-700 border-slate-200";
-                if (item.priority === "عاجل جداً") priorityBadge = "bg-rose-50 text-rose-700 border-rose-300 animate-pulse";
-                if (item.priority === "هام") priorityBadge = "bg-amber-50 text-amber-700 border-amber-300";
-
-                const notes = item.notesList || [];
-
-                return `
-                    <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50/70 hover:bg-white transition-all shadow-sm hover:shadow-md flex flex-col justify-between gap-4">
-                        
-                        <!-- Header & Meta -->
-                        <div>
-                            <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
-                                <div>
-                                    <span class="text-xs font-bold px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-100 inline-block mb-1">
-                                        <i class="fa-solid fa-tag text-indigo-500 ml-1"></i> ${item.category || 'بلاغ عام'}
-                                    </span>
-                                    <h4 class="font-bold text-slate-800 text-xs sm:text-sm">المضيف: <span class="text-indigo-600">${item.hostName || 'غير محدد'}</span></h4>
-                                </div>
-
-                                <div class="flex items-center gap-2">
-                                    <span class="px-2.5 py-1 text-xs font-bold rounded-lg border ${priorityBadge}">
-                                        ${item.priority}
-                                    </span>
-                                    <button onclick="deleteReport(${item.id})" title="حذف البلاغ" class="no-print text-slate-400 hover:text-rose-600 p-1">
-                                        <i class="fa-solid fa-trash-can text-sm"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Details Content -->
-                            <div class="mt-3 text-xs sm:text-sm text-slate-800 leading-relaxed font-semibold bg-white p-3.5 rounded-xl border border-slate-200/80">
-                                ${item.details}
-                            </div>
-
-                            <!-- Extra Tag & Date -->
-                            <div class="flex items-center justify-between text-[11px] text-slate-500 mt-2 px-1">
-                                <span><i class="fa-solid fa-hashtag text-slate-400 ml-1"></i> رقم/مكان: <strong>${item.abayaTag || item.locationNum || 'غير مدون'}</strong></span>
-                                <span><i class="fa-solid fa-clock text-slate-400 ml-1"></i> ${item.reportDate || item.date || ''} ${item.timestamp ? `- ${item.timestamp}` : ''}</span>
-                            </div>
-                        </div>
-
-                        <!-- System Status Selector -->
-                        <div class="bg-indigo-50/40 p-3 rounded-xl border border-indigo-100/60 no-print">
-                            <div class="flex items-center justify-between gap-2">
-                                <label class="text-xs font-bold text-indigo-900 flex items-center gap-1">
-                                    <i class="fa-solid fa-arrows-spin text-indigo-600"></i> حالة البلاغ بالسيستم:
-                                </label>
-                                <select onchange="updateReportStatus(${item.id}, this.value)" 
-                                        class="text-xs font-bold rounded-lg px-2.5 py-1 border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                                            item.status === 'تم الحل' ? 'bg-emerald-100 text-emerald-800' :
-                                            item.status === 'قيد المتابعة' ? 'bg-amber-100 text-amber-800' : 'bg-white text-slate-700'
-                                        }">
-                                    <option value="جديد" ${item.status === 'جديد' ? 'selected' : ''}>جديد</option>
-                                    <option value="قيد المتابعة" ${item.status === 'قيد المتابعة' ? 'selected' : ''}>قيد المتابعة</option>
-                                    <option value="تم الحل" ${item.status === 'تم الحل' ? 'selected' : ''}>تم الحل</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Notes/Comments Section (ملاحظات السيستم) -->
-                        <div class="border-t border-slate-200/80 pt-3">
-                            <div class="flex items-center justify-between mb-2">
-                                <h5 class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-comment-dots text-indigo-500"></i>
-                                    ملاحظات التعقيب بالسيستم (${notes.length})
-                                </h5>
-                            </div>
-
-                            <!-- List of existing notes -->
-                            <div class="space-y-2 mb-3 max-h-36 overflow-y-auto custom-scrollbar pl-1">
-                                ${notes.length === 0 ? `
-                                    <p class="text-[11px] text-slate-400 italic bg-white p-2 rounded-lg border border-dashed border-slate-200">لا توجد ملاحظات مدونة على هذا البلاغ حتى الآن.</p>
-                                ` : notes.map(n => `
-                                    <div class="bg-white p-2.5 rounded-xl border border-slate-200 text-xs relative group flex items-start justify-between gap-2 shadow-2xs">
-                                        <div class="space-y-0.5">
-                                            <p class="text-slate-800 font-medium leading-snug">${n.text}</p>
-                                            <span class="text-[10px] text-slate-400 font-mono block">${n.date}</span>
-                                        </div>
-                                        <button onclick="deleteNote(${item.id}, ${n.id})" title="مسح الملاحظة" class="no-print text-slate-300 hover:text-rose-500 transition-colors">
-                                            <i class="fa-solid fa-xmark text-xs"></i>
-                                        </button>
-                                    </div>
-                                `).join('')}
-                            </div>
-
-                            <!-- Add Note Form -->
-                            <div class="flex items-center gap-2 no-print">
-                                <input type="text" id="noteInput-${item.id}" 
-                                       placeholder="اكتب ملاحظة جديدة..." 
-                                       onkeydown="if(event.key === 'Enter') addNoteToReport(${item.id})"
-                                       class="w-full text-xs px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                                <button onclick="addNoteToReport(${item.id})" 
-                                        class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1 shrink-0">
-                                    <i class="fa-solid fa-plus"></i>
-                                    <span>إضافة</span>
-                                </button>
-                            </div>
-                        </div>
-
-                    </div>
-                `;
-            }).join('');
-        }
-    </script>
+    // 7. استرجاع البيانات المحفوظة
+    function loadSavedData() {
+      const saved = localStorage.getItem('alabaa_report_view2_db');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          if (data.status) document.getElementById('reportStatus').value = data.status;
+          if (data.notes) notesList = data.notes;
+        } catch(e) {}
+      }
+      updateStatusStyle();
+      renderNotes();
+    }
+  </script>
 </body>
 </html>
