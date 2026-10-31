@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مضيف أهل العباء - البلاد القديم | عرض ومتابعة الرصد (رقم 2)</title>
+  <title>مضيف أهل العباء - البلاد القديم | عرض ومتابعة الرصد (2)</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -137,7 +137,7 @@
       </div>
       <div class="flex items-center gap-3 w-full md:w-auto justify-end">
         <button type="button" onclick="saveTrackingState()" class="px-5 py-2.5 bg-maroon-700 hover:bg-maroon-800 text-white rounded-lg font-bold text-sm transition shadow flex items-center gap-2">
-          <i class="fa-solid fa-floppy-disk text-gold-400"></i> حفظ الحالة والملاحظات
+          <i class="fa-solid fa-floppy-disk text-gold-400"></i> حفظ الحالة والملاحظات وإرسال إشعار
         </button>
         <button type="button" onclick="window.print()" class="px-5 py-2.5 bg-gold-500 hover:bg-gold-600 text-white rounded-lg font-bold text-sm transition shadow flex items-center gap-2">
           <i class="fa-solid fa-print"></i> طباعة / PDF
@@ -182,9 +182,14 @@
       const input = document.getElementById('newNoteInput');
       const text = input.value.trim();
       if (!text) { alert('الرجاء كتابة الملاحظة أولاً.'); return; }
-      notesList.push({ text: text, time: document.getElementById('liveTime').textContent, date: document.getElementById('liveDate').textContent });
+      
+      const newNote = { text: text, time: document.getElementById('liveTime').textContent, date: document.getElementById('liveDate').textContent };
+      notesList.push(newNote);
       input.value = '';
       renderNotes();
+      
+      // إرسال إشعار فور إضافة ملاحظة
+      triggerNotificationToPage1(`تمت إضافة ملاحظة جديدة من صفحة رقم (2): "${text.substring(0, 30)}..."`);
       saveTrackingState();
     }
 
@@ -232,10 +237,23 @@
       renderNotes();
     }
 
+    // دالة إرسال التنبيه إلى صفحة رقم 1
+    function triggerNotificationToPage1(message) {
+      const notificationObj = {
+        message: message,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('ahl_alabaa_notification', JSON.stringify(notificationObj));
+    }
+
     function saveTrackingState() {
-      const data = { status: document.getElementById('reportStatus').value, notes: notesList };
+      const currentStatus = document.getElementById('reportStatus').value;
+      const data = { status: currentStatus, notes: notesList };
       localStorage.setItem('ahl_alabaa_tracking_db', JSON.stringify(data));
-      alert('تم حفظ الحالة والملاحظات بنجاح!');
+      
+      // إرسال إشعار بتحديث الحالة
+      triggerNotificationToPage1(`تم تحديث حالة التقرير في صفحة رقم (2) إلى: [ ${currentStatus} ]`);
+      alert('تم حفظ الحالة والملاحظات وإرسال الإشعار إلى صفحة رقم (1) بنجاح!');
     }
 
     window.addEventListener('DOMContentLoaded', loadData);
