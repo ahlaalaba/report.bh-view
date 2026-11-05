@@ -98,5 +98,140 @@
 
     /* أزرار التحكم */
     .controls { width: 210mm; margin: 20px auto 0 auto; display: flex; gap: 10px; justify-content: center; }
-    .btn-main { padding: 1
-  
+    .btn-main { padding: 10px 20px; font-size: 16px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; color: white; background-color: #28a745; }
+    .btn-print { background-color: #6c757d; }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .page-container { border: none; box-shadow: none; width: 100%; padding: 0; }
+      .controls, .search-box, .btn-action { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-container">
+    <!-- الشعار -->
+    <div class="header">
+      <div class="logo-container">
+        <div class="flower-icon">
+          <div class="petal p1"></div><div class="petal p2"></div>
+          <div class="petal p3"></div><div class="petal p4"></div>
+          <div class="petal p5"></div><div class="p-center"></div>
+        </div>
+        <div class="logo-text-top">مضيف</div>
+        <div class="logo-text-main">أهل العباء</div>
+      </div>
+      <div>
+        <div class="doc-title">سجل عرض وتتبع تقارير الاستشارات</div>
+      </div>
+    </div>
+
+    <!-- حقل البحث -->
+    <div class="search-box">
+      <input type="text" id="searchInput" class="search-input" onkeyup="filterReports()" placeholder="ابحث باسم صاحب الاستشارة أو الصفة...">
+    </div>
+
+    <!-- جدول عرض التقارير -->
+    <table id="reportsTable">
+      <thead>
+        <tr>
+          <th>رقم التقرير</th>
+          <th>اسم الكريم</th>
+          <th>التاريخ</th>
+          <th>الصفة / اللجنة</th>
+          <th>حالة الملاحظات</th>
+          <th>الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>#101</td>
+          <td>محمد علي</td>
+          <td>2026/11/01</td>
+          <td><span class="badge">الرئيس</span></td>
+          <td><span style="color: green; font-weight: bold;">مكتملة</span></td>
+          <td>
+            <button class="btn-action btn-view" onclick="viewDetails('محمد علي')">عرض</button>
+            <button class="btn-action btn-edit-admin" onclick="adminAccess('101')">الأدمن 🔐</button>
+          </td>
+        </tr>
+        <tr>
+          <td>#102</td>
+          <td>حسين أحمد</td>
+          <td>2026/11/03</td>
+          <td><span class="badge">لجنة العزاء</span></td>
+          <td><span style="color: red; font-weight: bold;">بانتظار الملاحظة</span></td>
+          <td>
+            <button class="btn-action btn-view" onclick="viewDetails('حسين أحمد')">عرض</button>
+            <button class="btn-action btn-edit-admin" onclick="adminAccess('102')">الأدمن 🔐</button>
+          </td>
+        </tr>
+        <tr>
+          <td>#103</td>
+          <td>زينب الكبرى</td>
+          <td>2026/11/05</td>
+          <td><span class="badge">لجنة الإعلامية</span></td>
+          <td><span style="color: green; font-weight: bold;">مكتملة</span></td>
+          <td>
+            <button class="btn-action btn-view" onclick="viewDetails('زينب الكبرى')">عرض</button>
+            <button class="btn-action btn-edit-admin" onclick="adminAccess('103')">الأدمن 🔐</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- الذيل والتوقيع -->
+    <div class="footer-text">نشكر إلى المضيف على التعاون</div>
+    <div class="footer-salutation">مع تحيات مضيف أهل العباء</div>
+
+    <div class="bottom-section">
+      <div class="stamp-container">
+        <div class="circle-stamp">
+          <span class="s-top">مضيف</span>
+          <span class="s-main">أهل العباء</span>
+        </div>
+        <div class="square-stamp">ختم المضيف</div>
+      </div>
+      <div class="signature-box">توقيع إدارة المضيف</div>
+    </div>
+  </div>
+
+  <!-- لوحة التحكم -->
+  <div class="controls">
+    <button class="btn-main" onclick="alert('سيتم توجيهك لصفحة كتابة تقرير جديد')">➕ إضافة تقرير جديد</button>
+    <button class="btn-main btn-print" onclick="window.print()">🖨️ طباعة القائمة</button>
+  </div>
+
+  <script>
+    // الرقم السري للأدمن
+    const ADMIN_PIN = "36386184";
+
+    // تصفية وحساب البحث في الجدول
+    function filterReports() {
+      const input = document.getElementById('searchInput').value.toLowerCase();
+      const rows = document.querySelectorAll('#reportsTable tbody tr');
+
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(input) ? '' : 'none';
+      });
+    }
+
+    // عرض تفاصيل التقرير
+    function viewDetails(name) {
+      alert("جاري فتح تقرير الاستشارة الخاص بـ: " + name);
+    }
+
+    // التحقق من الرقم السري للأدمن للتعديل
+    function adminAccess(reportId) {
+      const pin = prompt("أدخل الرقم السري للتحكم بالأدمن في التقرير رقم #" + reportId + ":");
+      if (pin === ADMIN_PIN) {
+        alert("تم التوثيق بنجاح! يمكنك الآن تعديل وإضافة ملاحظات الأدمن للتقرير رقم #" + reportId);
+      } else if (pin !== null) {
+        alert("الرقم السري غير صحيح!");
+      }
+    }
+  </script>
+</body>
+</html>
